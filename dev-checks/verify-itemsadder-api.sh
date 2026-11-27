@@ -34,10 +34,13 @@ need_member $A.CustomStack "org.bukkit.inventory.ItemStack getItemStack()"      
 need_member $A.CustomFurniture "static $A.CustomFurniture byAlreadySpawned(org.bukkit.entity.Entity)" "byAlreadySpawned(Entity)"
 need_member $A.CustomFurniture "void remove(boolean)"                                "remove(boolean)"
 
+# In ItemsAdder 4.0.3 these three events extend FurnitureEvent, which itself extends PlayerEvent.
+need_class $A.Events.FurnitureEvent
+need_member $A.Events.FurnitureEvent "extends org.bukkit.event.player.PlayerEvent" "extends PlayerEvent (inherits getPlayer())"
 for e in FurniturePlaceSuccessEvent FurnitureInteractEvent FurnitureBreakEvent; do
-  need_member $A.Events.$e "java.lang.String getNamespacedID()"     "getNamespacedID()"
+  need_member $A.Events.$e "java.lang.String getNamespacedID()" "getNamespacedID()"
   need_member $A.Events.$e "org.bukkit.entity.Entity getBukkitEntity()" "getBukkitEntity()"
-  need_member $A.Events.$e "extends org.bukkit.event.player.PlayerEvent" "extends PlayerEvent (getPlayer())"
+  need_member $A.Events.$e "extends $A.Events.FurnitureEvent" "extends FurnitureEvent"
 done
 need_member $A.Events.FurnitureInteractEvent "implements org.bukkit.event.Cancellable" "Cancellable"
 need_member $A.Events.FurnitureBreakEvent    "implements org.bukkit.event.Cancellable" "Cancellable"
