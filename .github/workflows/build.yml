@@ -47,14 +47,22 @@ jobs:
         working-directory: VeyrionCharacter
         run: mvn --batch-mode --no-transfer-progress install
 
-      - name: Install ItemsAdder 4.0.3 API
+      - name: Build ItemsAdder 4.0.3 compile-only API
+        working-directory: VeyrionWardrobe
         shell: bash
         run: |
-          API_JAR="VeyrionWardrobe/libs/itemsadder-api-4.0.3.jar"
-          if [ ! -s "$API_JAR" ]; then
-            echo "::error::Missing $API_JAR. Add the ItemsAdder 4.0.3 API-only jar at this path."
-            exit 1
-          fi
+          set -euo pipefail
+          SRC="dev-checks/stubs-unverified-stage3"
+          OUT="$RUNNER_TEMP/itemsadder-api-classes"
+          API_JAR="$RUNNER_TEMP/itemsadder-api-4.0.3.jar"
+
+          test -d "$SRC" || { echo "::error::Missing ItemsAdder API signature sources: $SRC"; exit 1; }
+          mkdir -p "$OUT"
+          find "$SRC" -name '*.java' -print0 | sort -z | xargs -0 javac --release 21 -d "$OUT"
+          jar --create --file "$API_JAR" -C "$OUT" dev/lone/itemsadder/api
+          test -s "$API_JAR"
+          jar --list --file "$API_JAR"
+
           mvn --batch-mode --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.3:install-file \
             -Dfile="$API_JAR" \
             -DgroupId=beer.devs \
