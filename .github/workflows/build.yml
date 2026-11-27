@@ -58,7 +58,7 @@ jobs:
 
           test -d "$SRC" || { echo "::error::Missing ItemsAdder API signature sources: $SRC"; exit 1; }
           mkdir -p "$OUT"
-          find "$SRC" -name '*.java' -print0 | sort -z | xargs -0 javac --release 21 -d "$OUT"
+          find "$SRC/dev/lone/itemsadder/api" -name '*.java' -print0 | xargs -0 javac --release 21 -sourcepath "$SRC" -d "$OUT"
           jar --create --file "$API_JAR" -C "$OUT" dev/lone/itemsadder/api
           test -s "$API_JAR"
           jar --list --file "$API_JAR"
