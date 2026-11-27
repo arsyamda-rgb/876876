@@ -8,15 +8,19 @@ Build order:
 If one of the three plugins is missing or the wrong version, VeyrionWardrobe disables itself and prints why (see `DependencyRules`). ItemsAdder is a hard dependency by design: the mirror is furniture.
 If the furniture id is not known to ItemsAdder (pack not installed, wrong `mirror.item-id`), the log says so once ItemsAdder has loaded, and `/wardrobe give` answers with the same reason.
 
-## ItemsAdder 4.0.3 API
+## ItemsAdder 4.0.3 compile-only API
 
-ItemsAdder 4.0.3 is not available from the configured Maven repositories. The GitHub Actions workflow installs the local API-only jar before compiling this plugin.
+The project targets the ItemsAdder 4.0.3 API. That exact artifact is not available from the configured public Maven repositories, so CI builds a small compile-only API jar from the signature sources in `dev-checks/stubs-unverified-stage3/dev/lone/itemsadder/api/` and installs it locally as `beer.devs:itemsadder-api:4.0.3`.
 
-1. Put the API-only jar at `libs/itemsadder-api-4.0.3.jar` in this repository.
-2. The workflow installs it locally using coordinates `beer.devs:itemsadder-api:4.0.3`, then runs `mvn package`.
-3. Do not put the full ItemsAdder plugin jar in this repository. The API-only jar should contain the `dev/lone/itemsadder/api/` classes needed for compilation.
+These signatures exist only to compile the plugin. They are not bundled into the final plugin jar; the server must provide the real ItemsAdder plugin at runtime. The stubs include only the ItemsAdder classes and members used by VeyrionWardrobe, not the full API.
 
-The API-only jar was extracted from an ItemsAdder 4.0.3 server jar. Check ItemsAdder's license/redistribution terms before committing it to this public repository. If redistribution is not permitted, keep the API jar in a private repository or use a private build process instead.
+To verify compatibility against the actual ItemsAdder 4.0.3 server jar, run:
+
+```bash
+dev-checks/verify-itemsadder-api.sh plugins/ItemsAdder.jar
+```
+
+The check uses `javap` on the real plugin jar and confirms that the required classes and methods exist. Do not add the full ItemsAdder plugin jar to this repository.
 
 ## Using the Aether Mirror
 1. An admin runs `/wardrobe give <player>`. The player places the item on the floor like any furniture (1 block wide, 2 high). The player who places it is the **owner**.
