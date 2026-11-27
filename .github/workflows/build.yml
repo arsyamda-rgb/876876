@@ -1,0 +1,68 @@
+name: Build VeyrionWardrobe
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wardrobe-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build with Java 21
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout VeyrionWardrobe
+        uses: actions/checkout@v6
+        with:
+          path: VeyrionWardrobe
+
+      - name: Checkout VeyrionCharacter
+        uses: actions/checkout@v6
+        with:
+          repository: arsyamda-rgb/ganteng-imut
+          ref: main
+          path: VeyrionCharacter
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: |
+            VeyrionWardrobe/pom.xml
+            VeyrionCharacter/pom.xml
+
+      - name: Build and install VeyrionCharacter
+        working-directory: VeyrionCharacter
+        run: mvn --batch-mode --no-transfer-progress install
+
+      - name: Build VeyrionWardrobe
+        working-directory: VeyrionWardrobe
+        run: mvn --batch-mode --no-transfer-progress package
+
+      - name: Verify JAR
+        shell: bash
+        working-directory: VeyrionWardrobe
+        run: |
+          test -s target/VeyrionWardrobe-0.3.0.jar
+          echo "Build output:"
+          ls -lh target/VeyrionWardrobe-*.jar
+
+      - name: Upload VeyrionWardrobe JAR
+        uses: actions/upload-artifact@v6
+        with:
+          name: VeyrionWardrobe-0.3.0
+          path: VeyrionWardrobe/target/VeyrionWardrobe-0.3.0.jar
+          if-no-files-found: error
+          retention-days: 14
