@@ -9,11 +9,14 @@ If one of the three plugins is missing or the wrong version, VeyrionWardrobe dis
 If the furniture id is not known to ItemsAdder (pack not installed, wrong `mirror.item-id`), the log says so once ItemsAdder has loaded, and `/wardrobe give` answers with the same reason.
 
 ## ItemsAdder 4.0.3 API
-The pom pins `beer.devs:itemsadder-api:4.0.3` (provided, never shaded). Nothing from 4.0.17 is used (`FurnitureInteractEvent#getAction()` and `FurniturePlacedEvent` are not called).
-1. Confirm the members against your real jar: `dev-checks/verify-itemsadder-api.sh plugins/ItemsAdder-4.0.3.jar` (needs a JDK; expect `RESULT: every ItemsAdder member ... exists`).
-2. If `mvn package` cannot resolve `beer.devs:itemsadder-api:4.0.3` (it was published before ItemsAdder moved to Maven Central, so it may not exist there), install the API classes from your own jar under the same coordinates:
-   `mvn install:install-file -Dfile=plugins/ItemsAdder-4.0.3.jar -DgroupId=beer.devs -DartifactId=itemsadder-api -Dversion=4.0.3 -Dpackaging=jar`
-   (CI needs the same step or a repository that hosts that file; do not commit the jar.)
+
+ItemsAdder 4.0.3 is not available from the configured Maven repositories. The GitHub Actions workflow installs the local API-only jar before compiling this plugin.
+
+1. Put the API-only jar at `libs/itemsadder-api-4.0.3.jar` in this repository.
+2. The workflow installs it locally using coordinates `beer.devs:itemsadder-api:4.0.3`, then runs `mvn package`.
+3. Do not put the full ItemsAdder plugin jar in this repository. The API-only jar should contain the `dev/lone/itemsadder/api/` classes needed for compilation.
+
+The API-only jar was extracted from an ItemsAdder 4.0.3 server jar. Check ItemsAdder's license/redistribution terms before committing it to this public repository. If redistribution is not permitted, keep the API jar in a private repository or use a private build process instead.
 
 ## Using the Aether Mirror
 1. An admin runs `/wardrobe give <player>`. The player places the item on the floor like any furniture (1 block wide, 2 high). The player who places it is the **owner**.
