@@ -47,6 +47,22 @@ jobs:
         working-directory: VeyrionCharacter
         run: mvn --batch-mode --no-transfer-progress install
 
+      - name: Install ItemsAdder 4.0.3 API
+        shell: bash
+        run: |
+          API_JAR="VeyrionWardrobe/libs/itemsadder-api-4.0.3.jar"
+          if [ ! -s "$API_JAR" ]; then
+            echo "::error::Missing $API_JAR. Add the ItemsAdder 4.0.3 API-only jar at this path."
+            exit 1
+          fi
+          mvn --batch-mode --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.3:install-file \
+            -Dfile="$API_JAR" \
+            -DgroupId=beer.devs \
+            -DartifactId=itemsadder-api \
+            -Dversion=4.0.3 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+
       - name: Build VeyrionWardrobe
         working-directory: VeyrionWardrobe
         run: mvn --batch-mode --no-transfer-progress package
